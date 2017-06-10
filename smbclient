@@ -1,0 +1,150 @@
+[V] Dependent program "nmblookup" found in /usr/bin/nmblookup
+[V] Dependent program "net" found in /usr/bin/net
+[V] Dependent program "rpcclient" found in /usr/bin/rpcclient
+[V] Dependent program "smbclient" found in /usr/bin/smbclient
+[V] Dependent program "polenum" found in /usr/bin/polenum
+[V] Dependent program "ldapsearch" found in /usr/bin/ldapsearch
+Starting enum4linux v0.8.9 ( http://labs.portcullis.co.uk/application/enum4linux/ ) on Fri Jun  9 23:32:43 2017
+
+ ========================== 
+|    Target Information    |
+ ========================== 
+Target ........... 10.11.1.31
+RID Range ........ 500-550,1000-1050
+Username ......... 'guest'
+Password ......... ''
+Known Usernames .. administrator, guest, krbtgt, domain admins, root, bin, none
+
+
+ ================================================== 
+|    Enumerating Workgroup/Domain on 10.11.1.31    |
+ ================================================== 
+[V] Attempting to get domain name with command: nmblookup -A '10.11.1.31'
+[+] Got domain/workgroup name: THINC
+
+ ========================================== 
+|    Nbtstat Information for 10.11.1.31    |
+ ========================================== 
+Looking up status of 10.11.1.31
+	RALPH           <00> -         B <ACTIVE>  Workstation Service
+	THINC           <00> - <GROUP> B <ACTIVE>  Domain/Workgroup Name
+	RALPH           <1f> -         B <ACTIVE>  NetDDE Service
+	RALPH           <03> -         B <ACTIVE>  Messenger Service
+	RALPH           <20> -         B <ACTIVE>  File Server Service
+	THINC           <1e> - <GROUP> B <ACTIVE>  Browser Service Elections
+	THINC           <1d> -         B <ACTIVE>  Master Browser
+	..__MSBROWSE__. <01> - <GROUP> B <ACTIVE>  Master Browser
+
+	MAC Address = 00-50-56-89-08-19
+
+ =================================== 
+|    Session Check on 10.11.1.31    |
+ =================================== 
+[V] Attempting to make null session using command: smbclient -W 'THINC' //'10.11.1.31'/ipc$ -U'guest'%'' -c 'help' 2>&1
+[+] Server 10.11.1.31 allows sessions using username 'guest', password ''
+
+ ========================================= 
+|    Getting domain SID for 10.11.1.31    |
+ ========================================= 
+[V] Attempting to get domain SID with command: rpcclient -W 'THINC' -U'guest'%'' 10.11.1.31 -c 'lsaquery' 2>&1
+Cannot connect to server.  Error was NT_STATUS_LOGON_FAILURE
+[+] Can't determine if host is part of domain or part of a workgroup
+
+ ==================================== 
+|    OS information on 10.11.1.31    |
+ ==================================== 
+[V] Attempting to get OS info with command: smbclient -W 'THINC' //'10.11.1.31'/ipc$ -U'guest'%'' -c 'q' 2>&1
+[+] Got OS info for 10.11.1.31 from smbclient: Domain=[RALPH] OS=[Windows Server 2003 3790 Service Pack 1] Server=[Windows Server 2003 5.2]
+[V] Attempting to get OS info with command: rpcclient -W 'THINC' -U'guest'%'' -c 'srvinfo' '10.11.1.31' 2>&1
+[+] Got OS info for 10.11.1.31 from srvinfo:
+Cannot connect to server.  Error was NT_STATUS_LOGON_FAILURE
+
+ =========================== 
+|    Users on 10.11.1.31    |
+ =========================== 
+[V] Attempting to get userlist with command: rpcclient -W 'THINC' -c querydispinfo -U'guest'%'' '10.11.1.31' 2>&1
+Use of uninitialized value $users in print at ./enum4linux.pl line 874.
+Use of uninitialized value $users in pattern match (m//) at ./enum4linux.pl line 877.
+
+[V] Attempting to get userlist with command: rpcclient -W 'THINC' -c enumdomusers -U'guest'%'' '10.11.1.31' 2>&1
+Use of uninitialized value $users in print at ./enum4linux.pl line 888.
+Use of uninitialized value $users in pattern match (m//) at ./enum4linux.pl line 890.
+
+ ======================================= 
+|    Share Enumeration on 10.11.1.31    |
+ ======================================= 
+[V] Attempting to get share list using authentication
+[E] Can't list shares: NT_STATUS_ACCESS_DENIED
+
+[+] Attempting to map shares on 10.11.1.31
+
+ ================================================== 
+|    Password Policy Information for 10.11.1.31    |
+ ================================================== 
+[V] Attempting to get Password Policy info with command: polenum 'guest':''@'10.11.1.31' 2>&1
+[E] Unexpected error from polenum:
+
+[+] Attaching to 10.11.1.31 using guest
+
+	[+] Trying protocol 445/SMB...
+
+[+] Found domain(s):
+
+	[+] RALPH
+	[+] Builtin
+
+[+] Password Info for Domain: RALPH
+Error Getting Password Policy: OpenDomain error
+[V] Attempting to get Password Policy info with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c "getdompwinfo" 2>&1
+
+[+] Retieved partial password policy with rpcclient:
+
+
+
+ ============================ 
+|    Groups on 10.11.1.31    |
+ ============================ 
+[V] Getting builtin groups with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'enumalsgroups builtin' 2>&1
+
+[+] Getting builtin groups:
+
+[+] Getting builtin group memberships:
+[V] Getting local groups with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'enumalsgroups domain' 2>&1
+
+[+] Getting local groups:
+
+[+] Getting local group memberships:
+[V] Getting domain groups with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c "enumdomgroups" 2>&1
+
+[+] Getting domain groups:
+
+[+] Getting domain group memberships:
+
+ ===================================================================== 
+|    Users on 10.11.1.31 via RID cycling (RIDS: 500-550,1000-1050)    |
+ ===================================================================== 
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames administrator' 2>&1
+[V] Assuming that user "administrator" exists
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames guest' 2>&1
+[V] Assuming that user "guest" exists
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames krbtgt' 2>&1
+[V] Assuming that user "krbtgt" exists
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames domain admins' 2>&1
+[V] Assuming that user "domain admins" exists
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames root' 2>&1
+[V] Assuming that user "root" exists
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames bin' 2>&1
+[V] Assuming that user "bin" exists
+[V] Attempting to get SID from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c 'lookupnames none' 2>&1
+[V] Assuming that user "none" exists
+[V] Attempting to get SIDs from 10.11.1.31 with command: rpcclient -W 'THINC' -U'guest'%'' '10.11.1.31' -c lsaenumsid 2>&1
+
+ =========================================== 
+|    Getting printer info for 10.11.1.31    |
+ =========================================== 
+[V] Attempting to get printer info with command: rpcclient -W 'THINC' -U'guest'%'' -c 'enumprinters' '10.11.1.31' 2>&1
+Cannot connect to server.  Error was NT_STATUS_LOGON_FAILURE
+
+
+enum4linux complete on Fri Jun  9 23:32:51 2017
+

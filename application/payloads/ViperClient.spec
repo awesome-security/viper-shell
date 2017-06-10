@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['ViperClient.py'],
-             pathex=['Z:\\home\\viper-framework\\application\\payloads'],
+             pathex=['Z:\\home\\viper-shell\\application\\payloads'],
              binaries=[],
              datas=[],
              hiddenimports=[],

