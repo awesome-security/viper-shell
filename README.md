@@ -95,7 +95,8 @@ Inside viper client modify these two lines with your local ip address
 use these once you get the call back from the client. first you will need to enter in the local host and port number that you assigned to the client before deploying. 
 
 ```
-[*] grab*<filename> ========= > grabs the file and saves it to the local desktop as .txt";
+[*] download ========= > downloads a file from the client machine (ex: download #source #dest);
+[*] upload   ========= > uploads a file to the client machine (ex: upload #source #dest);
 [*] getenv       ========= >  prints the system information";
 [*] getuid       ========= > Get the user level access of the shell";
 [*] SystemInfo   ========= > Get Fingerprint of the system"; todo
