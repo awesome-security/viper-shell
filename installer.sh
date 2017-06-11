@@ -35,15 +35,17 @@ echo "Viper will install python setuptools, software properties, and depends"
 apt-get install python-setuptools -y
 apt-get install python-software-properties -y
 apt-get install build-essential libssl-dev libffi-dev python-dev -y
+apt-get install python-qt4
 apt-get install python-dev -y
 apt-get install python-pip -y
 apt-get install python-twisted -y
+apt-get install python-qt4 -y
 pip install zope.interface
 pip install --upgrade twisted
 pip install service_identity
 pip install pycrypto
 pip install cryptography
-
+pip install rdpy
 #location of twisted source ver 17.1.0 if needed
 #wget https://twistedmatrix.com/Releases/Twisted/17.1/Twisted-17.1.0.tar.bz2
 #tar xvf Twisted-17.1.0.tar.bz2
