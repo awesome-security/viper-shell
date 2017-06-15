@@ -104,6 +104,9 @@ use these once you get the call back from the client. first you will need to ent
 [*] Cover        ========= > Delete all traces of logs"; todo
 ```
 
+*important note: to upload or download source or dest must be full file paths with file names or program may currently break. #working on this. 
+
+
 ```
 Please help Contribute!
 

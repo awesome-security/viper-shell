@@ -106,6 +106,16 @@ use these once you get the call back from the client. first you will need to ent
 
 *important note: to upload or download source or dest must be full file paths with file names or program may currently break. #working on this. 
 
+***Twisted Remote Desktop integration*** 
+
+For now there is a rdpclient located in /application/services/rdpy-viperclient.py
+
+usage
+
+```
+./rdpy-rdpclient.py -u username -p password 10.11.4.94:3389
+```
+
 
 ```
 Please help Contribute!
